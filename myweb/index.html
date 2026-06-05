@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบแจ้งซ่อมออนไลน์ โรงเรียนพานพิทยาคม V3</title>
+<meta property="og:title" content="ระบบแจ้งซ่อมออนไลน์">
+<meta property="og:description" content="แจ้งอุปกรณ์หรือสถานที่ที่เสียในโรงเรียน">
+<meta property="og:image" content="https://ลิงก์รูปของนาย/image.png">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="https://phanphit.ac.th/home/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --navy:#0a2240;
+  --navy-light:#103060;
+  --gold:#c8a44a;
+  --gold-light:#e8c470;
+  --blue:#1a4fa0;
+  --blue-mid:#2563b8;
+  --sky:#e8f0fb;
+  --border:#c5d0e0;
+  --text:#1a2535;
+  --muted:#5a6a80;
+  --bg:#f0f3f8;
+  --white:#ffffff;
+  --red:#c0392b;
+  --green:#1a7a45;
+  --orange:#e67e22;
+  --shadow:0 2px 12px rgba(10,34,64,.12);
+  --shadow-lg:0 8px 32px rgba(10,34,64,.18);
+}
+
+body{
+  font-family:'Sarabun',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:16px;
+  line-height:1.6;
+}
+
+.topbar{background:var(--navy);color:#cbd8eb;font-size:13px;padding:6px 0;border-bottom:2px solid var(--gold);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;}
+.topbar-brand{font-weight:600;color:var(--gold-light);letter-spacing:.3px;}
+
+.header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 60%,var(--blue) 100%);color:white;padding:24px 0 20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-40px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(200,164,74,.08);pointer-events:none;}
+.header::after{content:'';position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px;position:relative;z-index:1;}
+.logo-seal{width:68px;height:68px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:3px solid var(--gold);box-shadow:0 0 0 4px rgba(200,164,74,.2);}
+.logo-seal svg{width:42px;height:42px;}
+.header-text h1{font-family:'Noto Serif Thai',serif;font-size:22px;font-weight:700;letter-spacing:.3px;line-height:1.3;color:white;}
+.header-text p{font-size:13.5px;color:#a8c0de;margin-top:3px;}
+.header-badge{margin-left:auto;background:rgba(200,164,74,.18);border:1px solid var(--gold);color:var(--gold-light);font-size:12px;padding:5px 14px;border-radius:4px;font-weight:600;letter-spacing:.5px;white-space:nowrap;}
+
+.navbar{background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.navbar-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:44px;}
+.nav-links{display:flex;gap:4px;list-style:none;}
+.nav-links a{display:block;padding:6px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:4px;font-weight:500;transition:all .15s;}
+.nav-links a:hover{background:var(--sky);color:var(--blue);}
+.nav-links a.active{background:var(--blue);color:white;}
+.nav-user{display:flex;align-items:center;gap:10px;font-size:13.5px;}
+.nav-user-name{font-weight:600;color:var(--navy);}
+.nav-user-role{color:var(--muted);font-size:12px;}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Sarabun',sans-serif;transition:all .15s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+.main{max-width:1100px;margin:32px auto;padding:0 24px;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.section-icon{width:40px;height:40px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.section-icon svg{width:22px;height:22px;stroke:white;fill:none;}
+.section-title h2{font-family:'Noto Serif Thai',serif;font-size:19px;font-weight:700;color:var(--navy);}
+.section-title p{font-size:13px;color:var(--muted);}
+
+.card{background:white;border-radius:10px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;}
+.card-header{background:var(--sky);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.card-header-left{display:flex;align-items:center;gap:10px;}
+.card-header-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.card-header-title{font-size:14px;font-weight:700;color:var(--navy);letter-spacing:.2px;}
+.card-body{padding:28px 28px 24px;}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;}
+.form-full{grid-column:1/-1;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:13.5px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:6px;}
+.required-mark{color:var(--red);font-size:12px;}
+.field input,.field textarea,.field select{padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:'Sarabun',sans-serif;color:var(--text);background:white;transition:border-color .15s,box-shadow .15s;outline:none;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue-mid);box-shadow:0 0 0 3px rgba(37,99,184,.1);}
+.field input::placeholder,.field textarea::placeholder{color:#b0bcc8;}
+.field textarea{min-height:100px;resize:vertical;}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6a80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.hint{font-size:12px;color:var(--muted);margin-top:2px;}
+
+.form-actions{margin-top:24px;display:flex;align-items:center;gap:14px;}
+.btn-submit{background:var(--navy);color:white;border:none;padding:12px 36px;border-radius:6px;font-size:15px;font-weight:700;font-family:'Sarabun',sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s,transform .1s;letter-spacing:.3px;}
+.btn-submit:hover{background:var(--blue);}
+.btn-submit:active{transform:scale(.98);}
+.btn-submit svg{width:18px;height:18px;stroke:white;fill:none;flex-shrink:0;}
+.btn-reset{background:none;border:1.5px solid var(--border);color:var(--muted);padding:12px 20px;border-radius:6px;font-size:14px;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .15s;}
+.btn-reset:hover{border-color:var(--muted);}
+
+.status-msg{display:none;margin-top:18px;padding:14px 18px;border-radius:6px;font-size:14px;font-weight:600;align-items:center;gap:10px;}
+.status-msg.success{display:flex;background:#eaf7ee;border:1px solid #a3d6b0;color:var(--green);}
+.status-msg.error{display:flex;background:#fef0ef;border:1px solid #f5b8b2;color:var(--red);}
+.status-msg.loading{display:flex;background:#fff9e6;border:1px solid #ffeaa7;color:var(--orange);}
+.status-msg svg{width:20px;height:20px;stroke:currentColor;fill:none;flex-shrink:0;}
+
+.infobox{background:var(--sky);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:var(--muted);margin-bottom:20px;}
+.infobox strong{color:var(--navy);}
+
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+.stat-info .stat-num{font-size:24px;font-weight:700;color:var(--navy);}
+.stat-info .stat-label{font-size:13px;color:var(--muted);}
+.stat-icon{font-size:28px;}
+.table-container{overflow-x:auto;margin-top:10px;}
+.admin-table{width:100%;border-collapse:collapse;font-size:14px;text-align:left;}
+.admin-table th{background:var(--navy);color:white;padding:12px;font-weight:600;}
+.admin-table td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.admin-table tr:hover{background:var(--sky);}
+.badge{padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;display:inline-block;}
+.badge.pending{background:#fff9e6;color:var(--orange);border:1px solid #ffeaa7;}
+.badge.approved{background:#eaf7ee;color:var(--green);border:1px solid #a3d6b0;}
+.badge.rejected{background:#fef0ef;color:var(--red);border:1px solid #f5b8b2;}
+.btn-action{padding:6px 12px;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;margin-right:4px;font-family:'Sarabun',sans-serif;transition:background .15s;}
+.btn-approve{background:var(--green);color:white;}
+.btn-approve:hover{background:#145c34;}
+.btn-reject{background:var(--red);color:white;}
+.btn-reject:hover{background:#962d22;}
+
+.footer{background:var(--navy);color:#6a82a0;text-align:center;padding:18px;font-size:12.5px;margin-top:48px;border-top:2px solid var(--gold);}
+.footer strong{color:var(--gold-light);}
+
+#login-screen{min-height:100vh;background:var(--bg);display:flex;flex-direction:column;}
+.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px;}
+.login-wrap{width:100%;max-width:440px;}
+.login-card{background:white;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow-lg);overflow:hidden;}
+.login-card-header{background:var(--navy);padding:28px 32px 24px;text-align:center;border-bottom:3px solid var(--gold);}
+.login-seal{width:64px;height:64px;background:white;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);}
+.login-seal svg{width:38px;height:38px;}
+.login-card-header h2{font-family:'Noto Serif Thai',serif;color:white;font-size:18px;font-weight:700;}
+.login-card-header p{color:#a8c0de;font-size:13px;margin-top:4px;}
+.login-card-body{padding:28px 32px 32px;}
+.login-field{margin-bottom:16px;}
+.login-field label{display:block;font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.login-field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:'Sarabun',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;}
+.login-field input:focus{border-color:var(--blue-mid);box-shadow:0 0 0 3px rgba(37,99,184,.1);}
+.remember-row{display:flex;align-items:center;gap:8px;margin:6px 0 22px;}
+.remember-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+.remember-row label{font-size:13.5px;color:var(--muted);cursor:pointer;}
+.btn-login{width:100%;background:var(--navy);color:white;border:none;padding:13px;border-radius:6px;font-size:16px;font-weight:700;font-family:'Sarabun',sans-serif;cursor:pointer;transition:background .15s;letter-spacing:.3px;}
+.btn-login:hover{background:var(--blue);}
+.login-error{display:none;background:#fef0ef;border:1px solid #f5b8b2;color:var(--red);padding:10px 14px;border-radius:6px;font-size:13.5px;font-weight:600;margin-top:14px;text-align:center;}
+.login-hint{margin-top:16px;background:var(--sky);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:12.5px;color:var(--muted);}
+.login-hint strong{color:var(--navy);}
+
+#app-screen{display:none;flex-direction:column;min-height:100vh;}
+
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr;}
+  .form-full{grid-column:1;}
+  .header-badge{display:none;}
+  .nav-links{display:none;}
+  .card-body{padding:20px 16px;}
+  .login-card-body{padding:20px 18px 24px;}
+}
+
+:root{
+ --navy:#6d4ab5!important;
+ --navy-light:#7c5dc0!important;
+ --gold:#ffffff!important;
+ --gold-light:#f3efff!important;
+ --blue:#8d73d8!important;
+ --blue-mid:#7a5bc8!important;
+ --sky:#f5f1ff!important;
+ --border:#d8cdf7!important;
+ --text:#2d2347!important;
+ --muted:#6b5b95!important;
+ --bg:#f8f6fd!important;
+}
+body{
+ background:linear-gradient(180deg,#faf8ff,#f3efff)!important;
+}
+.header{
+ background:linear-gradient(135deg,#4b2d87 0%,#6d4ab5 50%,#9b83df 100%)!important;
+}
+.card,.login-card,.stat-card{
+ border:none!important;
+ border-radius:18px!important;
+ box-shadow:0 15px 35px rgba(109,74,181,.15)!important;
+}
+.btn-submit,.btn-login{
+ background:#6d4ab5!important;
+ border-radius:12px!important;
+}
+.btn-submit:hover,.btn-login:hover{
+ background:#4b2d87!important;
+}
+.logo-seal,.login-seal{
+ overflow:hidden!important;
+}
+.logo-seal img,.login-seal img{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ border-radius:50%;
+}
+.topbar-brand{
+ font-weight:700!important;
+}
+
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span class="topbar-brand">ระบบแจ้งซ่อมออนไลน์ — โรงเรียน</span>
+      <span>เวอร์ชัน 2.0</span>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-seal"><img src="logo.jpg" alt="โลโก้โรงเรียนพานพิทยาคม"></div>
+      <div class="header-text">
+        <h1>ระบบแจ้งซ่อมออนไลน์</h1>
+        <p>โรงเรียนพานพิทยาคม</p>
+      </div>
+      <div class="header-badge"></div>
+    </div>
+  </div>
+
+  <div class="login-body">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-card-header">
+          <div class="login-seal"><img src="logo.jpg" alt="โลโก้โรงเรียนพานพิทยาคม"></div>
+          <h2>เข้าสู่ระบบ</h2>
+          <p>กรุณายืนยันตัวตนก่อนใช้งาน</p>
+        </div>
+        <div class="login-card-body">
+          <div class="login-field">
+            <label for="login-username">ชื่อผู้ใช้งาน (Username)</label>
+            <input type="text" id="login-username" placeholder="กรอกชื่อผู้ใช้งาน" autocomplete="username">
+          </div>
+          <div class="login-field">
+            <label for="login-password">รหัสผ่าน (Password)</label>
+            <input type="password" id="login-password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password">
+          </div>
+          <div class="remember-row">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me">จดจำการเข้าสู่ระบบ (Remember Me)</label>
+          </div>
+          <button class="btn-login" onclick="doLogin()">เข้าสู่ระบบ</button>
+          <div class="login-error" id="login-error">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</div>
+          <div class="login-hint">
+            <strong>บัญชีทดสอบ:</strong><br>
+            นักเรียน: <strong>student</strong> / <strong>1234</strong><br>
+            ครู: <strong>teacher</strong> / <strong>school2024</strong><br>
+            ผู้ดูแล: <strong>admin</strong> / <strong>admin2024</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <strong>ระบบแจ้งซ่อมออนไลน์</strong> &nbsp;|&nbsp; พัฒนาเพื่อการศึกษา &nbsp;|&nbsp; &copy; 2567
+  </div>
+</div>
+
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span class="topbar-brand">ระบบแจ้งซ่อมออนไลน์ — โรงเรียน</span>
+      <span id="topbar-date"></span>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-seal"><img src="logo.jpg" alt="โลโก้โรงเรียนพานพิทยาคม"></div>
+      <div class="header-text">
+        <h1>ระบบแจ้งซ่อมออนไลน์</h1>
+        <p>โรงเรียนพานพิทยาคม</p>
+      </div>
+      <div class="header-badge"></div>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="navbar-inner">
+      <ul class="nav-links">
+        <li><a href="#" class="active" id="nav-main-title">🔧 แจ้งซ่อม</a></li>
+      </ul>
+      <div class="nav-user">
+        <div>
+          <div class="nav-user-name" id="nav-user-name">—</div>
+          <div class="nav-user-role" id="nav-user-role">—</div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main" id="view-user">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </div>
+      <div class="section-title">
+        <h2>แบบฟอร์มแจ้งซ่อมอุปกรณ์ / สถานที่</h2>
+        <p>กรอกข้อมูลให้ครบถ้วนเพื่อประสิทธิภาพในการซ่อมบำรุง</p>
+      </div>
+    </div>
+
+    <div class="infobox">
+      <strong>คำแนะนำ:</strong> กรอกข้อมูลให้ครบทุกช่องที่มีเครื่องหมาย <span style="color:var(--red);">*</span> และอธิบายปัญหาให้ชัดเจนที่สุด
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-header-dot"></div>
+          <span class="card-header-title">ข้อมูลการแจ้งซ่อม</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>ชื่อผู้แจ้ง <span class="required-mark">*</span></label>
+            <input type="text" id="f-name" placeholder="ชื่อ-นามสกุล">
+          </div>
+          <div class="field">
+            <label>ชั้น / ห้อง <span class="required-mark">*</span></label>
+            <input type="text" id="f-class" placeholder="เช่น ม.5/5">
+          </div>
+          <div class="field">
+            <label>ห้อง / จุดที่เสีย <span class="required-mark">*</span></label>
+            <input type="text" id="f-room" placeholder="เช่น ห้องน้ำชั้น 2, ห้องวิทย์ 301">
+          </div>
+          <div class="field">
+            <label>ประเภทปัญหา <span class="required-mark">*</span></label>
+            <select id="f-category">
+              <option value="">— เลือกประเภท —</option>
+              <option>ไฟฟ้า / แสงสว่าง</option>
+              <option>ประปา / น้ำ</option>
+              <option>อุปกรณ์ / เฟอร์นิเจอร์</option>
+              <option>ประตู / หน้าต่าง</option>
+              <option>คอมพิวเตอร์ / อิเล็กทรอนิกส์</option>
+              <option>พื้น / ผนัง / หลังคา</option>
+              <option>อื่น ๆ</option>
+            </select>
+          </div>
+          <div class="field form-full">
+            <label>รายละเอียดปัญหา <span class="required-mark">*</span></label>
+            <input type="text" id="f-issue" placeholder="เช่น พัดลมเสีย, ไฟดับ, ก๊อกน้ำรั่ว">
+          </div>
+          <div class="field">
+            <label>ระดับความเร่งด่วน <span class="required-mark">*</span></label>
+            <select id="f-urgency">
+              <option value="">— เลือกระดับ —</option>
+              <option>ปกติ (ดำเนินการได้ตามรอบ)</option>
+              <option>ด่วน (ควรซ่อมภายใน 3 วัน)</option>
+              <option>เร่งด่วนมาก (ต้องซ่อมทันที)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>เบอร์โทรติดต่อ (ถ้ามี)</label>
+            <input type="tel" id="f-phone" placeholder="เช่น 08XXXXXXXX">
+          </div>
+          <div class="field form-full">
+            <label>รายละเอียดเพิ่มเติม</label>
+            <textarea id="f-detail" placeholder="อธิบายสภาพความเสียหายเพิ่มเติม..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-submit" onclick="sendReport()">ส่งแบบแจ้งซ่อม</button>
+          <button class="btn-reset" onclick="resetForm()">ล้างข้อมูล</button>
+        </div>
+
+        <div class="status-msg" id="status-msg"><span id="status-text"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main" id="view-admin" style="display:none;">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--gold);">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+        </svg>
+      </div>
+      <div class="section-title">
+        <h2>แผงควบคุมผู้ดูแลระบบ</h2>
+        <p>ตรวจสอบ ติดตาม และอนุมัติรายการแจ้งซ่อมของโรงเรียน</p>
+      </div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card"><div class="stat-info"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">รอดำเนินการ</div></div><div class="stat-icon">⏳</div></div>
+      <div class="stat-card"><div class="stat-info"><div class="stat-num" id="stat-approved">0</div><div class="stat-label">อนุมัติแล้ว/กำลังซ่อม</div></div><div class="stat-icon">✅</div></div>
+      <div class="stat-card"><div class="stat-info"><div class="stat-num" id="stat-rejected">0</div><div class="stat-label">ปฏิเสธแล้ว</div></div><div class="stat-icon">❌</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-header-dot" style="background:var(--gold);"></div>
+          <span class="card-header-title">รายการแจ้งซ่อมทั้งหมดที่เข้ามาผ่านเว็บ</span>
+        </div>
+        <button class="btn-reset" style="padding:4px 12px; font-size:12px;" onclick="loadAdminData()">🔄 รีเฟรชข้อมูล</button>
+      </div>
+      <div class="card-body" style="padding:10px;">
+        <div id="admin-loading" style="text-align:center; padding:20px; color:var(--muted);">กำลังโหลดข้อมูลจาก Google Sheets...</div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>วัน-เวลา</th>
+                <th>ผู้แจ้ง</th>
+                <th>ห้อง/สถานที่</th>
+                <th>ประเภท</th>
+                <th>ปัญหาที่พบ</th>
+                <th>ความเร่งด่วน</th>
+                <th>สถานะ</th>
+                <th>จัดการคําขอ</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <strong>ระบบแจ้งซ่อมออนไลน์</strong> &nbsp;|&nbsp; ฝ่ายอาคารสถานที่และสิ่งแวดล้อม &nbsp;|&nbsp; &copy; 2567
+  </div>
+</div>
+
+<script>
+const ACCOUNTS = {
+  student:  { pass:'1234',       name:'นักเรียน (ทดสอบ)', role:'นักเรียน' },
+  teacher:  { pass:'school2024', name:'ครูผู้สอน',         role:'ครู' },
+  admin:    { pass:'admin2024',  name:'ผู้ดูแลระบบ',        role:'ผู้ดูแล' },
+};
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_mBvLDENuFO_bgVthficZCj3hmiP_5DU8x3IL-DaSJvS2mzwtnxScX-fBc9tR4wLz/exec';
+
+function requestJson(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      if (script.parentNode) script.parentNode.removeChild(script);
+      try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+    }
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('JSONP request failed'));
+    };
+
+    const sep = url.includes('?') ? '&' : '?';
+    script.src = `${url}${sep}callback=${callbackName}`;
+    document.head.appendChild(script);
+  });
+}
+
+function setCookie(name,value,days){
+  const d=new Date();
+  d.setTime(d.getTime()+(days*864e5));
+  document.cookie=name+'='+encodeURIComponent(value)+';expires='+d.toUTCString()+';path=/;SameSite=Lax';
+}
+function getCookie(name){
+  const c=document.cookie.split(';').map(s=>s.trim());
+  for(const s of c){
+    if(s.startsWith(name+'=')){
+      try{return decodeURIComponent(s.slice(name.length+1));}catch{return '';}
+    }
+  }
+  return '';
+}
+function deleteCookie(name){
+  document.cookie=name+'=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
+}
+
+let currentUser=null;
+
+function initApp(){
+  const saved=getCookie('school_session');
+  if(saved && ACCOUNTS[saved]){ loginAs(saved); return; }
+  const rem=getCookie('school_remember');
+  if(rem){
+    document.getElementById('login-username').value=rem;
+    document.getElementById('remember-me').checked=true;
+  }
+  showLogin();
+}
+
+function showLogin(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+}
+
+function loginAs(username){
+  currentUser=username;
+  const acc=ACCOUNTS[username];
+  document.getElementById('nav-user-name').textContent=acc.name;
+  document.getElementById('nav-user-role').textContent=acc.role;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='flex';
+
+  if(acc.role === 'ผู้ดูแล') {
+    document.getElementById('view-user').style.display = 'none';
+    document.getElementById('view-admin').style.display = 'block';
+    document.getElementById('nav-main-title').textContent = '📊 แดชบอร์ดผู้ดูแล';
+    loadAdminData();
+  } else {
+    document.getElementById('view-user').style.display = 'block';
+    document.getElementById('view-admin').style.display = 'none';
+    document.getElementById('nav-main-title').textContent = '🔧 แจ้งซ่อม';
+    if(acc.role==='นักเรียน') document.getElementById('f-name').value=acc.name==='นักเรียน (ทดสอบ)'?'':acc.name;
+  }
+  updateDate();
+}
+
+function doLogin(){
+  const u=document.getElementById('login-username').value.trim();
+  const p=document.getElementById('login-password').value;
+  const rem=document.getElementById('remember-me').checked;
+  const err=document.getElementById('login-error');
+
+  if(!ACCOUNTS[u]||ACCOUNTS[u].pass!==p){
+    err.style.display='block';
+    document.getElementById('login-password').value='';
+    return;
+  }
+  err.style.display='none';
+
+  if(rem){
+    setCookie('school_session',u,30);
+    setCookie('school_remember',u,30);
+  } else {
+    deleteCookie('school_session');
+    deleteCookie('school_remember');
+    document.cookie='school_session='+encodeURIComponent(u)+';path=/;SameSite=Lax';
+  }
+  loginAs(u);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('login-password').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+  document.getElementById('login-username').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('login-password').focus(); });
+  initApp();
+});
+
+function doLogout(){
+  deleteCookie('school_session');
+  currentUser=null;
+  resetForm();
+  showLogin();
+}
+
+function updateDate(){
+  const now=new Date();
+  const th=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('topbar-date').textContent=th;
+}
+
+function sendReport(){
+  const name    = document.getElementById('f-name').value.trim();
+  const cls     = document.getElementById('f-class').value.trim();
+  const room    = document.getElementById('f-room').value.trim();
+  const cat     = document.getElementById('f-category').value;
+  const issue   = document.getElementById('f-issue').value.trim();
+  const urgency = document.getElementById('f-urgency').value;
+  const phone   = document.getElementById('f-phone').value.trim();
+  const detail  = document.getElementById('f-detail').value.trim();
+
+  if(!name || !cls || !room || !cat || !issue || !urgency){
+    showStatus('error','กรุณากรอกข้อมูลให้ครบ');
+    return;
+  }
+
+  showStatus('loading','กำลังส่งข้อมูล...');
+
+  const url =
+    SCRIPT_URL +
+    '?action=add' +
+    '&name=' + encodeURIComponent(name) +
+    '&cls=' + encodeURIComponent(cls) +
+    '&room=' + encodeURIComponent(room) +
+    '&category=' + encodeURIComponent(cat) +
+    '&issue=' + encodeURIComponent(issue) +
+    '&urgency=' + encodeURIComponent(urgency) +
+    '&phone=' + encodeURIComponent(phone) +
+    '&detail=' + encodeURIComponent(detail);
+
+  requestJson(url)
+    .then(data => {
+      if(data && data.success){
+        showStatus('success','ส่งข้อมูลสำเร็จ');
+        resetForm();
+      } else {
+        showStatus('error','ส่งข้อมูลไม่สำเร็จ');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showStatus('error','เชื่อมต่อ Apps Script ไม่ได้');
+    });
+}
+
+function showStatus(type,msg){
+  const el=document.getElementById('status-msg');
+  el.className='status-msg '+type;
+  document.getElementById('status-text').textContent=msg;
+  el.style.display='flex';
+}
+
+function resetForm(){
+  ['f-name','f-class','f-room','f-issue','f-phone','f-detail'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('f-category').value='';
+  document.getElementById('f-urgency').value='';
+  if(document.getElementById('status-msg')) document.getElementById('status-msg').style.display='none';
+}
+
+function normalizeStatus(status){
+  const s = String(status || '').trim();
+  if (s === 'อนุมัติ' || s === 'อนุมัติแล้ว' || s.toLowerCase() === 'approved') return 'อนุมัติแล้ว';
+  if (s === 'ปฏิเสธ' || s.toLowerCase() === 'rejected') return 'ปฏิเสธ';
+  return s || 'รอดำเนินการ';
+}
+
+function formatThaiDateTime(value){
+  if(!value) return '-';
+  const d = new Date(value);
+  if(isNaN(d.getTime())) return value;
+  return d.toLocaleString('th-TH', {
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit'
+  });
+}
+
+function loadAdminData() {
+  document.getElementById('admin-loading').style.display = 'block';
+  document.getElementById('admin-table-body').innerHTML = '';
+
+  requestJson(SCRIPT_URL + '?action=get')
+  .then(data => {
+    document.getElementById('admin-loading').style.display = 'none';
+    let pending = 0, approved = 0, rejected = 0;
+
+    if(!Array.isArray(data) || data.length === 0) {
+      document.getElementById('admin-table-body').innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--muted);">ยังไม่มีรายการแจ้งซ่อมเข้ามา</td></tr>';
+      document.getElementById('stat-pending').textContent = 0;
+      document.getElementById('stat-approved').textContent = 0;
+      document.getElementById('stat-rejected').textContent = 0;
+      return;
+    }
+
+    const rows = data.slice().reverse();
+    rows.forEach(row => {
+      const statusText = normalizeStatus(row.status);
+      if (statusText === 'อนุมัติแล้ว') approved++;
+      else if (statusText === 'ปฏิเสธ') rejected++;
+      else pending++;
+
+      const badgeClass = statusText === 'อนุมัติแล้ว' ? 'approved' : (statusText === 'ปฏิเสธ' ? 'rejected' : 'pending');
+      const safeId = String(row.id || '').replace(/'/g, '&#39;');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${formatThaiDateTime(row.timestamp)}</td>
+        <td><strong>${row.name || '-'}</strong><br><small style="color:var(--muted)">${row.cls || '-'}</small></td>
+        <td>${row.room || '-'}</td>
+        <td>${row.category || '-'}</td>
+        <td>${row.issue || '-'} <br><small style="color:var(--muted)">${row.detail || ''}</small></td>
+        <td>${row.urgency || '-'}</td>
+        <td><span class="badge ${badgeClass}">${statusText}</span></td>
+        <td>
+          ${(statusText === 'รอดำเนินการ' || statusText === '-') ? `
+            <button class="btn-action btn-approve" onclick="updateStatus('${safeId}', 'อนุมัติแล้ว')">อนุมัติ</button>
+            <button class="btn-action btn-reject" onclick="updateStatus('${safeId}', 'ปฏิเสธ')">ปฏิเสธ</button>
+          ` : `<span style="color:var(--muted); font-size:12px;">จัดการแล้ว</span>`}
+        </td>
+      `;
+      document.getElementById('admin-table-body').appendChild(tr);
+    });
+
+    document.getElementById('stat-pending').textContent = pending;
+    document.getElementById('stat-approved').textContent = approved;
+    document.getElementById('stat-rejected').textContent = rejected;
+  })
+  .catch(() => {
+    document.getElementById('admin-loading').textContent = '❌ ไม่สามารถโหลดข้อมูลได้ กรุณาเช็กสิทธิ์หรือความถูกต้องของ Apps Script';
+  });
+}
+
+function updateStatus(rowId, newStatus) {
+  if(!confirm(`คุณต้องการเปลี่ยนสถานะรายการนี้เป็น "${newStatus}" ใช่หรือไม่?`)) return;
+
+  requestJson(`${SCRIPT_URL}?action=update&id=${encodeURIComponent(rowId)}&status=${encodeURIComponent(newStatus)}`)
+  .then(result => {
+    if(result && result.success) {
+      alert('อัปเดตสถานะสำเร็จ!');
+      loadAdminData();
+    } else {
+      alert('เกิดข้อผิดพลาด: ' + (result && result.message ? result.message : 'ไม่ทราบสาเหตุ'));
+    }
+  })
+  .catch(() => {
+    setTimeout(loadAdminData, 2000);
+  });
+}
+</script>
+</body>
+</html>
