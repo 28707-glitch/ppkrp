@@ -170,6 +170,7 @@ body{
   .login-card-body{padding:20px 18px 24px;}
 }
 
+/* บังคับใช้สไตล์ธีมสีม่วงตามที่คุณพี่ส่งมาในส่วนท้าย */
 :root{
  --navy:#6d4ab5!important;
  --navy-light:#7c5dc0!important;
@@ -213,7 +214,6 @@ body{
 .topbar-brand{
  font-weight:700!important;
 }
-
 </style>
 </head>
 <body>
@@ -222,7 +222,7 @@ body{
   <div class="topbar">
     <div class="topbar-inner">
       <span class="topbar-brand">ระบบแจ้งซ่อมออนไลน์ — โรงเรียน</span>
-      <span>เวอร์ชัน 2.0</span>
+      <span>เวอร์ชัน 3.0</span>
     </div>
   </div>
 
@@ -362,7 +362,7 @@ body{
             </select>
           </div>
           <div class="field form-full">
-            <label>รายละเอียดปัญหา <span class="required-mark">*</span></label>
+            <label>ปัญหาที่พบ <span class="required-mark">*</span></label>
             <input type="text" id="f-issue" placeholder="เช่น พัดลมเสีย, ไฟดับ, ก๊อกน้ำรั่ว">
           </div>
           <div class="field">
@@ -378,6 +378,13 @@ body{
             <label>เบอร์โทรติดต่อ (ถ้ามี)</label>
             <input type="tel" id="f-phone" placeholder="เช่น 08XXXXXXXX">
           </div>
+          
+          <div class="field form-full">
+            <label>แนบรูปภาพความเสียหาย (ถ้ามี)</label>
+            <input type="file" id="f-image" accept="image/*" style="padding: 7px 12px;">
+            <div class="hint">รองรับไฟล์รูปภาพขนาดไม่เกิน 5MB (ระบบจะบันทึกลง Google Drive ให้โดยอัตโนมัติ)</div>
+          </div>
+
           <div class="field form-full">
             <label>รายละเอียดเพิ่มเติม</label>
             <textarea id="f-detail" placeholder="อธิบายสภาพความเสียหายเพิ่มเติม..."></textarea>
@@ -456,7 +463,8 @@ const ACCOUNTS = {
   admin:    { pass:'admin2024',  name:'ผู้ดูแลระบบ',        role:'ผู้ดูแล' },
 };
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_mBvLDENuFO_bgVthficZCj3hmiP_5DU8x3IL-DaSJvS2mzwtnxScX-fBc9tR4wLz/exec';
+// URL เว็บแอปของ Apps Script คุณพี่
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTf53RqdLHcWWRW724Dq7Wl9kgpA87Qzu5FnAGTw9MowUg8CSUHLNeGiulCnZxOEIL/exec';
 
 function requestJson(url) {
   return new Promise((resolve, reject) => {
@@ -585,6 +593,7 @@ function updateDate(){
   document.getElementById('topbar-date').textContent=th;
 }
 
+// แก้ไขฟังก์ชันส่งข้อมูลเป็นแบบ POST เพื่อให้รองรับไฟล์ Base64 ขนาดยาว
 function sendReport(){
   const name    = document.getElementById('f-name').value.trim();
   const cls     = document.getElementById('f-class').value.trim();
@@ -594,6 +603,7 @@ function sendReport(){
   const urgency = document.getElementById('f-urgency').value;
   const phone   = document.getElementById('f-phone').value.trim();
   const detail  = document.getElementById('f-detail').value.trim();
+  const fileInput = document.getElementById('f-image');
 
   if(!name || !cls || !room || !cat || !issue || !urgency){
     showStatus('error','กรุณากรอกข้อมูลให้ครบ');
@@ -602,31 +612,62 @@ function sendReport(){
 
   showStatus('loading','กำลังส่งข้อมูล...');
 
-  const url =
-    SCRIPT_URL +
-    '?action=add' +
-    '&name=' + encodeURIComponent(name) +
-    '&cls=' + encodeURIComponent(cls) +
-    '&room=' + encodeURIComponent(room) +
-    '&category=' + encodeURIComponent(cat) +
-    '&issue=' + encodeURIComponent(issue) +
-    '&urgency=' + encodeURIComponent(urgency) +
-    '&phone=' + encodeURIComponent(phone) +
-    '&detail=' + encodeURIComponent(detail);
+  const payload = {
+    action: 'add',
+    name: name,
+    cls: cls,
+    room: room,
+    category: cat,
+    issue: issue,
+    urgency: urgency,
+    phone: phone,
+    detail: detail,
+    image: ""
+  };
 
-  requestJson(url)
-    .then(data => {
-      if(data && data.success){
-        showStatus('success','ส่งข้อมูลสำเร็จ');
-        resetForm();
-      } else {
-        showStatus('error','ส่งข้อมูลไม่สำเร็จ');
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      showStatus('error','เชื่อมต่อ Apps Script ไม่ได้');
-    });
+  // ตรวจสอบว่ามีการอัปโหลดรูปภาพหรือไม่
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      showStatus('error', 'ขนาดรูปภาพต้องไม่เกิน 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      payload.image = e.target.result;
+      submitPayload(payload);
+    };
+    reader.onerror = function() {
+      showStatus('error', 'ไม่สามารถอ่านไฟล์รูปภาพได้');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    submitPayload(payload);
+  }
+}
+
+function submitPayload(payload) {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data && data.success){
+      showStatus('success','ส่งข้อมูลสำเร็จ ' + (data.id ? '(รหัสคำขอ: ' + data.id + ')' : ''));
+      resetForm();
+    } else {
+      showStatus('error','ส่งข้อมูลไม่สำเร็จ: ' + (data.message || 'ไม่ทราบสาเหตุ'));
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showStatus('error','เชื่อมต่อ Apps Script ไม่ได้ หรือติดปัญหา CORS');
+  });
 }
 
 function showStatus(type,msg){
@@ -642,6 +683,8 @@ function resetForm(){
   });
   document.getElementById('f-category').value='';
   document.getElementById('f-urgency').value='';
+  const fileInput = document.getElementById('f-image');
+  if (fileInput) fileInput.value = ''; 
   if(document.getElementById('status-msg')) document.getElementById('status-msg').style.display='none';
 }
 
@@ -695,7 +738,10 @@ function loadAdminData() {
         <td><strong>${row.name || '-'}</strong><br><small style="color:var(--muted)">${row.cls || '-'}</small></td>
         <td>${row.room || '-'}</td>
         <td>${row.category || '-'}</td>
-        <td>${row.issue || '-'} <br><small style="color:var(--muted)">${row.detail || ''}</small></td>
+        <td>
+          ${row.issue || '-'} <br><small style="color:var(--muted)">${row.detail || ''}</small>
+          ${row.imageUrl ? `<br><a href="${row.imageUrl}" target="_blank" style="color:#6d4ab5; font-size:12px; font-weight:bold; text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-top:4px;">🖼️ ดูรูปภาพแนบ</a>` : ''}
+        </td>
         <td>${row.urgency || '-'}</td>
         <td><span class="badge ${badgeClass}">${statusText}</span></td>
         <td>
